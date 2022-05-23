@@ -234,6 +234,9 @@ def cleanArguments(compounds = False):
                         elif language == "kor":
                             if casemarker not in [u"는", u"은", u"도"]:
                                 coreArg = False
+                        elif language == "urd":
+                            if casemarker not in [u"نے", u"کو"]:
+                                coreArg = False
                         else:
                             coreArg = False 
                     if coreArg:
