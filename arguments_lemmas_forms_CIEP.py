@@ -65,7 +65,8 @@ import re
 from random import sample 
 #The following dictionary should reflect source data directory
 languages_ciep = ["bg","br","cs","cy","da","de","el","en","es","fa","fr","ga","hbs","hi","hy","it","kmr","la","lt","lv","nl","no","pl","pt","ro","ru","sk","sv","uk","ur"]
-languages_with_cases = ["bg","cs", "el", "ga", "hy", "kmr", "la", "lv", "lt", "pl", "pt", "ro", "sp", "ru", "hi", "fa", "hbs", "sk", "sv", "ur", "uk"]
+#Celtic languages, Latin, Norwegian, Ukrainian, Slovak and Polish do not have any case adpositions for A and P.
+languages_with_cases = ["bg","cs", "el", "hy", "kmr",  "lv", "lt",  "pt", "ro", "sp", "ru", "hi", "fa", "hbs", "sk", "sv", "ur"]
 
 def findArguments(source,target,compounds):
     language_list = languages_ciep
@@ -277,6 +278,9 @@ def cleanArguments(source,target,compounds):
                                 coreArg = False
                         elif language == "hi":
                             if casemarker != u"को":
+                                coreArg = False
+                        elif language == "ur":
+                            if casemarker not in [u"نے", u"کو"]:
                                 coreArg = False
                         else:
                             coreArg = False 
