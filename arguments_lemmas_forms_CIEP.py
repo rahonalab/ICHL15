@@ -63,18 +63,41 @@ from collections import OrderedDict
 from collections import defaultdict
 import re
 from random import sample 
-#The following dictionary should reflect source data directory
+#The following dictionary should reflect source data directory: all the languages from our sample
 languages_ciep = ["bg","br","cs","cy","da","de","el","en","es","fa","fr","ga","hbs","hi","hy","it","kmr","la","lt","lv","nl","no","pl","pt","ro","ru","sk","sv","uk","ur"]
-#Celtic languages, Latin, Norwegian, Ukrainian, Slovak and Polish do not have any case adpositions for A and P.
-languages_with_cases = ["bg","cs", "el", "hy", "kmr",  "lv", "lt",  "pt", "ro", "sp", "ru", "hi", "fa", "hbs", "sk", "sv", "ur"]
+#We include languages with morphological and syntactic (adposition) case marking
+languages_with_cases = ["cs",
+"cy",
+"da",
+"de",
+"el",
+"es",
+"fa",
+"fr",
+"hbs",
+"hi",
+"hy",
+"it",
+"kmr",
+"la",
+"lt",
+"lv",
+"no",
+"pl",
+"pt",
+"ro",
+"ru",
+"sk",
+"sv",
+"uk",
+"ur"]
 
 def findArguments(source,target,compounds):
     language_list = languages_ciep
     args = ["nsubj", "obj", "iobj", "obl"]
     for language in language_list:
         print (language)
-        path = source + language + "_*"
-        files = glob.glob(path)
+        files = glob.glob(source+ language + "/*.conllu")
         if compounds == False:
             outfilename = target + "/arguments_" + language + "_new.txt"
         else:
@@ -219,10 +242,10 @@ def cleanArguments(source,target,compounds):
     for language in language_list:
         print (language)
         if compounds == False: 
-            #filename = directory + "arguments_" + language + "_new.txt"
-            #outfilename = directory + "arguments_" + language + "_clean.txt"
-            filename = target + "/" + language + "_forms.txt"
-            outfilename = target + "/" + language + "_forms_clean.txt"
+            filename = target + "arguments_" + language + "_new.txt"
+            outfilename = target + "arguments_" + language + "_clean.txt"
+            #filename = target + "/" + language + "_forms.txt"
+            #outfilename = target + "/" + language + "_forms_clean.txt"
         else:
             filename = target + "/" + "arguments_" + language + "_compounds_new.txt"
             outfilename = target + "/" +"arguments_" + language + "_compounds_clean.txt"
@@ -270,8 +293,11 @@ def cleanArguments(source,target,compounds):
                         elif language == "ro":
                             if casemarker != "pe":
                                 coreArg = False
-                        elif language == "fr":
+                        elif language == "fr": #Partitive
                             if casemarker not in ["de", "d'", "d’", "du", "des"]:
+                                coreArg = False
+                        elif language == "it": #Partitive
+                            if casemarker not in ["di", "d'", "d’"]:
                                 coreArg = False
                         elif language == "fa":
                             if casemarker != u"را":
@@ -282,6 +308,9 @@ def cleanArguments(source,target,compounds):
                         elif language == "ur":
                             if casemarker not in [u"نے", u"کو"]:
                                 coreArg = False
+                        elif language == "cy": #subject marking, King 2003:298-299
+                            if casemarker != "yn":
+                                coreArg= False
                         else:
                             coreArg = False 
                     if coreArg:
@@ -302,7 +331,6 @@ def main():
     #We call the two main functions with source, target and compounds set to FALSE
     findArguments(args.source,args.target,0)
     cleanArguments(args.source,args.target,0)
-    word_order() 
     print("Done! Happy corpus-based typological linguistics!\n")
 
 if __name__ == "__main__":
