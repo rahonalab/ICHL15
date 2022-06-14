@@ -1,4 +1,99 @@
 #!/usr/bin/env python3
+import sys
+import subprocess
+import re
+import pprint
+import glob
+import os
+import random
+import unicodedata
+import collections
+import csv
+import string
+import pyconll
+import pyconll.util
+
+try:
+    import argparse
+except ImportError:
+    checkpkg.check(['python-argparse'])
+
+import time
+import socket
+
+"""
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+"""
+
+USAGE = './arguments_lemmas_forms_new.py <source_directory> <target_directory> [-h]'
+
+def build_parser():
+
+    parser = argparse.ArgumentParser(description='word order script: The script extracts the data to compute word order rigidity (1 - entropy) and verb-medial order.')
+
+
+    parser.add_argument('source',help='Source for conllu files. It should have conllu files organized in sub-directories, e.g. en uk hbs')
+    parser.add_argument('target',help='Target directory for output files.')
+
+    return parser
+
+def check_args(args):
+    '''Exit if required arguments not specified'''
+    check_flags = {}
+
+import sys
+import subprocess
+import re
+import pprint
+import glob
+import os
+import random
+import unicodedata
+import collections
+import csv
+import string
+import pyconll
+import pyconll.util
+
+try:
+    import argparse
+except ImportError:
+    checkpkg.check(['python-argparse'])
+
+import time
+import socket
+
+"""
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+"""
+
+USAGE = './arguments_lemmas_forms_new.py <source_directory> <target_directory> [-h]'
 
 import glob
 from collections import OrderedDict
@@ -9,8 +104,8 @@ from random import sample
 languages_ciep = ["bg","br","cs","cy","da","de","el","en","es","fa","fr","ga","hbs","hi","hy","it","kmr","la","lt","lv","nl","no","pl","pt","ro","ru","sk","sv","uk","ur"]
 #We include languages with morphological and syntactic (adposition) case marking
 languages_with_cases = languages_with_cases = ["cs",
-"cy",
 "da",
+"cy",
 "de",
 "el",
 "es",
@@ -34,18 +129,19 @@ languages_with_cases = languages_with_cases = ["cs",
 "uk",
 "ur"]
 
-#!!!Natalia: not sure da, no and sv have cases, or have they?
+#!!!Natalia: not sure da, no and sv have cases, or have they? 
+#!!!Luigi: da, sv and no has (some relics of) genitive
 
-def findArguments(compounds = False):
+def findArguments(source,target,compounds):
     language_list = languages_with_cases
     args = ["nsubj", "obj", "iobj", "obl"]
     for language in language_list:
         print (language)
-        files = glob.glob("D:/Corpora/ud-treebanks-v2.7/UD_Swedish-Talbanken/*.conllu")
+        files = glob.glob(source+ language + "/*.conllu")
         if compounds == False:
-            outfilename = "arguments_" + language + "_new.txt"
+            outfilename = target + "/arguments_" + language + "_new.txt"
         else:
-            outfilename = "arguments_" + language + "_compounds_new.txt"
+            outfilename = target +  "/arguments_" + language + "_compounds_new.txt"
         outfile = open(outfilename, "wb")
         for filename in files:
             print (filename)
@@ -190,15 +286,13 @@ def check_adposition(wordform, token_id, lines, language):
 
 #An additional round of clearning is necessary. I also think there should be more 
 
-def cleanArguments(compounds = False):
+def cleanArguments(source,target,compounds):
     language_list = languages_with_cases
     for language in language_list:
         print (language)
         if compounds == False: 
-            filename = "arguments_" + language + "_new.txt"
-            outfilename = "arguments_" + language + "_clean.txt"
-            #filename = target + "/" + language + "_forms.txt"
-            #outfilename = target + "/" + language + "_forms_clean.txt"
+            filename = target + "/arguments_" + language + "_new.txt"
+            outfilename = target + "/arguments_" + language + "_clean.txt"
         else:
             filename = "arguments_" + language + "_compounds_new.txt"
             outfilename = "arguments_" + language + "_compounds_clean.txt"
@@ -227,6 +321,12 @@ def cleanArguments(compounds = False):
                         if language in ["hi", "hin"]:
                             if casemarker!= u"ने":
                                 coreArg = False 
+#!!!Natalia: this is the branch for object marking. Are you sure this should be here? I haven't been able to find this use of yn with transitive subjects.
+#Could you please double-check and uncomment or tranfer to the subject branch, if necessary?
+#!!!Luigi: Moved to the subject branch, according to the following reference, it should be a subject marker: "Both are markers of a following complement (see §15). In practice they draw attention to the subject of the sentence whenever the main verb of that sentence is bod to be (in any of its forms)." King 2003:298-299 
+                        elif language in ["cy", "cym"]: 
+                            if casemarker != "yn":
+                                coreArg= False
                         else:
                             coreArg = False 
                     if coreArg:
@@ -258,14 +358,30 @@ def cleanArguments(compounds = False):
                         elif language in ["ur", "urd"]:
                             if casemarker not in [u"نے", u"کو"]:
                                 coreArg = False
-#!!!Natalia: this is the branch for object marking. Are you sure this should be here? I haven't been able to find this use of yn with transitive subjects.
-#Could you please double-check and uncomment or tranfer to the subject branch, if necessary?
-#                        elif language in ["cy", "cym"]: #subject marking, King 2003:298-299 
-#                            if casemarker != "yn":
-#                                coreArg= False
                         else:
                             coreArg = False 
                     if coreArg:
                         outfile.write(line)                           
         outfile.close()
+
+def main():
+    global debug
+    global args
+    global seppath
+    parser = build_parser()
+    args = parser.parse_args()
+    seppath = '/'
+    '''Check arguments'''    
+    if check_args(args) is False:
+     sys.stderr.write("There was a problem validating the arguments supplied. Please check your input and try again. Exiting...\n")
+     sys.exit(1)
+    #We call the two main functions with source, target and compounds set to FALSE
+    #findArguments(args.source,args.target,0)
+    cleanArguments(args.source,args.target,0)
+    print("Done! Happy corpus-based typological linguistics!\n")
+
+if __name__ == "__main__":
+    main()
+    sys.exit(0)
+
 
