@@ -12,6 +12,8 @@ import csv
 import string
 import pyconll
 import pyconll.util
+import numpy as np
+from scipy.stats import entropy
 
 try:
     import argparse
@@ -38,10 +40,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
-USAGE = './word_order_script_6orders.py <source_directory> <target_directory> [-h]'
+USAGE = './word_order_script_CIEP.py <source_directory> <target_directory> [-h]'
 
 def build_parser():
-    parser = argparse.ArgumentParser(description='word order script - six order version: The script extracts the data to compute the six word orders (SOV). The function below extracts the data to compute word order rigidity (1 - entropy) and verb order metric.\n The output contains the following columns:\n "Language", "SOV", "SVO", "OSV", "OVS", "VSO", "VOS". All counts are provided only for S and O expressed by nouns, and for lexical verbs. ')
+
+    parser = argparse.ArgumentParser(description='word order script: The script extracts the data to compute word order rigidity (1 - entropy)')
+
+
     parser.add_argument('source',help='Source for conllu files. It should have conllu files organized in sub-directories, e.g. en uk hbs')
     parser.add_argument('target',help='Output file: tsv (tabular-separated value) file')
 
@@ -51,29 +56,24 @@ def check_args(args):
     '''Exit if required arguments not specified'''
     check_flags = {}
 
-
-import glob
-
+#The following dictionary should reflect source data directory
 languages_ciep = ["bg","br","cs","cy","da","de","el","en","es","fa","fr","ga","hbs","hi","hy","it","kmr","la","lt","lv","nl","no","pl","pt","ro","ru","sk","sv","uk","ur"]
 
-#The function below extracts the data to compute word order rigidity (1 - entropy) and verb order metric.
+#The function below extracts the data to compute word order rigidity (1 - entropy) and verb-medial order.
 #The output contains the following columns:
-#"Language", "SOV", "SVO", "OSV", "OVS", "VSO", "VOS". All counts are provided only for S and O expressed by nouns, and for lexical verbs.
+#"Language", SO/OS- nouns: occurrences of SO/OS as nouns, SO,OS- all: occurrences of SO/OS as all POSes
 
-    
-def find_all_orders(directory, outfilename): #e.g., directory = "D:/Corpora/ud-treebanks-v2.7/"
+
+def so_rigidity(directory,outfilename): #e.g., directory = "E:/LeipzigCorpora/Parsed/"
     outfile = open(outfilename, "w")
-    outfile.write("Language\tSOV\tSVO\tOSV\tOVS\tVSO\tVOS\tVerbScore\n") 
+    outfile.write("Language\tSO-nouns\tOS-nouns\tSO-all\tOS-all\n")
     for language in languages_ciep: 
-#        filenames = glob.glob(directory + language + "*") 
-        filenames = glob.glob(directory + language + "/*.conllu")
+        filenames = glob.glob(directory+ language + "/*.conllu")
         print(filenames)
-        SOV = 0
-        SVO = 0
-        OSV = 0
-        OVS = 0
-        VSO = 0
-        VOS = 0
+        SO_nouns = 0
+        OS_nouns = 0
+        SO_all = 0
+        OS_all = 0
         for filename in filenames:
             print (filename)
             try:
@@ -86,7 +86,7 @@ def find_all_orders(directory, outfilename): #e.g., directory = "D:/Corpora/ud-t
                 corpus = file.read()
             sentences = corpus.split("\n\n")
             if len(sentences) == 1:
-                sentences = corpus.split("\n\r")#because of different formats and encodings in my corpora, probably not needed for CIEP
+                sentences = corpus.split("\n\r")
             print (len(sentences))
             for sentence in sentences:
                 lines = sentence.strip().split("\n")
@@ -106,41 +106,35 @@ def find_all_orders(directory, outfilename): #e.g., directory = "D:/Corpora/ud-t
                                         dep1 = linelist1[7]
                                         if ":" in dep1:
                                             dep1 = dep1.split(":")[0]
-                                        if dep1 == "obj" and linelist1[3] in ["NOUN", "PROPN"]:
+                                        if dep1 == "obj":
                                             obj = 1
                                             token_id_obj = linelist1[0]
                                             if "-" in token_id_obj:
                                                 token_id_obj = token_id_obj.split("-")[0]
-                                        elif dep1 == "nsubj" and linelist1[3] in ["NOUN", "PROPN"]:
+                                            POS_obj = linelist1[3]
+                                        elif dep1 == "nsubj":
                                             subj = 1
                                             token_id_subj = linelist1[0]
                                             if "-" in token_id_subj:
                                                 token_id_subj = token_id_subj.split("-")[0]
+                                            POS_subj = linelist1[3]
                             if obj == 1 and subj == 1:
                                 token_id = int(token_id)
                                 token_id_subj = int(token_id_subj)
                                 token_id_obj = int(token_id_obj)
-                                if token_id > token_id_subj and token_id < token_id_obj:
-                                    SVO += 1
-                                elif token_id_obj > token_id_subj and token_id > token_id_obj:
-                                    SOV += 1
-                                elif token_id > token_id_obj and token_id_subj > token_id:
-                                    OVS += 1
-                                elif token_id_subj > token_id_obj and token_id > token_id_subj:
-                                    OSV += 1
-                                elif token_id_subj > token_id and token_id_obj > token_id_subj:
-                                    VSO += 1
-                                elif token_id_obj > token_id and token_id_subj > token_id_obj:
-                                    VOS += 1
-                                else:
-                                    print ("verb: " + str(token_id))
-                                    print ("subject: " + str(token_id_subj))
-                                    print ("object: " + str(token_id_obj))     
-        verb_order_score = ((VSO + VOS) + (SVO + OVS)*2 + (SOV + OSV)*3)/(SOV + SVO + VSO + VOS + OVS + OSV)
-        out = language + "\t" + str(SOV) + "\t" + str(SVO) + "\t" + str(OSV) + "\t" + str(OVS) + "\t" + str(VSO) + "\t" + str(VOS) + "\t" + str(verb_order_score) +"\n"
+                                if token_id_subj < token_id_obj:
+                                    SO_all += 1
+                                if token_id_subj > token_id_obj:
+                                    OS_all += 1
+                                if POS_subj == "NOUN" and POS_obj == "NOUN":
+                                    if token_id_subj < token_id_obj:
+                                        SO_nouns += 1
+                                    if token_id_subj > token_id_obj:
+                                        OS_nouns += 1
+        out = language + "\t" + str(SO_nouns) + "\t" + str(OS_nouns) + "\t" + str(SO_all) + "\t" + str(OS_all) + "\n"
         print (out)
         outfile.write(out)
-    outfile.close()    
+    outfile.close()  
 
 def main():
     global debug
@@ -153,7 +147,7 @@ def main():
     if check_args(args) is False:
      sys.stderr.write("There was a problem validating the arguments supplied. Please check your input and try again. Exiting...\n")
      sys.exit(1)
-    find_all_orders(args.source,args.target) 
+    so_rigidity(args.source,args.target) 
     print("Done! Happy corpus-based typological linguistics!\n")
 
 if __name__ == "__main__":
