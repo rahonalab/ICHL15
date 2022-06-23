@@ -67,7 +67,7 @@ languages_ciep = ["bg","br","cs","cy","da","de","el","en","es","fa","fr","ga","h
 def so_rigidity(directory,outfilename): #e.g., directory = "E:/LeipzigCorpora/Parsed/"
     outfile = open(outfilename, "w")
     outfile.write("Language\tSO-nouns\tOS-nouns\tSO-all\tOS-all\n")
-    for language in languages_ciep: 
+    for language in ["cy","test"]: 
         filenames = glob.glob(directory+ language + "/*.conllu")
         print(filenames)
         SO_nouns = 0
