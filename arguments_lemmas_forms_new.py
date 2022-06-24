@@ -135,7 +135,7 @@ languages_with_cases = languages_with_cases = ["cs",
 def findArguments(source,target,compounds):
     language_list = languages_with_cases
     args = ["nsubj", "obj", "iobj", "obl"]
-    for language in language_list:
+    for language in ["ga","hy","no","pl","sk","ur","uk"]:
         print (language)
         files = glob.glob(source+ language + "/*.conllu")
         if compounds == False:
@@ -143,6 +143,7 @@ def findArguments(source,target,compounds):
         else:
             outfilename = target +  "/arguments_" + language + "_compounds_new.txt"
         outfile = open(outfilename, "wb")
+        outfile.write(bytes("lemma" + "\t" + "feats" + "\t" + "upos" + "\t" + "dep" + "\t" + "UDdep" + "\t" + "wordform" + "\n","UTF-8"))
         for filename in files:
             print (filename)
             file = open(filename, "rb")
@@ -171,6 +172,7 @@ def findArguments(source,target,compounds):
                             if POS in ["NOUN", "PROPN", "VERB", "ADJ", "NUM", "SYM"]:     
                                 token_id = linelist[0]
                                 lemma = linelist[2].lower()
+                                feats = "NA"
                                 if lemma == "_":
                                     lemma = linelist[1].lower() 
                                 if compounds == True:
@@ -183,15 +185,15 @@ def findArguments(source,target,compounds):
                                         if "Case" not in feature:
                                             morphology_output = morphology_output + "|" + feature
                                     if len(morph_features) > 0:
-                                        lemma = lemma + morphology_output
+                                        feats = morphology_output
                                 if dep == "nsubj":                            
                                     if checkTrans(head_id, lines):
                                         dep = "nsubj_tr"
                                     else:   
                                         dep = "nsubj_intr" 
                                 wordform = linelist[1].lower()
-                                wordform = check_adposition(wordform, token_id, lines, language)                             
-                                out = lemma + "\t" + POS + "\t" + dep + "\t" + dep_original + "\t" + wordform + "\n"
+                                wordform = check_adposition(wordform, token_id, lines, language)
+                                out = lemma + "\t" + feats.replace("||","") + "\t" + POS + "\t" + dep + "\t" + dep_original + "\t" + wordform + "\n"
                                 outfile.write(bytes(out, "UTF-8"))
         outfile.close()
 
@@ -288,7 +290,7 @@ def check_adposition(wordform, token_id, lines, language):
 
 def cleanArguments(source,target,compounds):
     language_list = languages_with_cases
-    for language in language_list:
+    for language in ["ga","hy","no","pl","sk","ur","uk"]:
         print (language)
         if compounds == False: 
             filename = target + "/arguments_" + language + "_new.txt"
@@ -376,7 +378,7 @@ def main():
      sys.stderr.write("There was a problem validating the arguments supplied. Please check your input and try again. Exiting...\n")
      sys.exit(1)
     #We call the two main functions with source, target and compounds set to FALSE
-    #findArguments(args.source,args.target,0)
+    findArguments(args.source,args.target,0)
     cleanArguments(args.source,args.target,0)
     print("Done! Happy corpus-based typological linguistics!\n")
 
