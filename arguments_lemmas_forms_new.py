@@ -306,11 +306,11 @@ def cleanArguments(source,target,compounds):
         for line in lines:
             line_UTF = str(line, "UTF-8", errors = "ignore")
             linelist = line_UTF.strip().split("\t")
-            if len(linelist) == 5:
+            if len(linelist) == 6:
                 POS = linelist[2]
                 dep = linelist[3]
                 wordform = linelist[5]
-                dep_detailed = linelist[6]
+                dep_detailed = linelist[4]
                 if dep == "nsubj_tr": #please double-check that
                 #if dep == "nsubj":
                     coreArg = True
