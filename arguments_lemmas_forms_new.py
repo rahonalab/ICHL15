@@ -307,10 +307,10 @@ def cleanArguments(source,target,compounds):
             line_UTF = str(line, "UTF-8", errors = "ignore")
             linelist = line_UTF.strip().split("\t")
             if len(linelist) == 5:
-                POS = linelist[1]
-                dep = linelist[2]
-                wordform = linelist[4]
-                dep_detailed = linelist[3]
+                POS = linelist[2]
+                dep = linelist[3]
+                wordform = linelist[5]
+                dep_detailed = linelist[6]
                 if dep == "nsubj_tr": #please double-check that
                 #if dep == "nsubj":
                     coreArg = True
@@ -378,7 +378,7 @@ def main():
      sys.stderr.write("There was a problem validating the arguments supplied. Please check your input and try again. Exiting...\n")
      sys.exit(1)
     #We call the two main functions with source, target and compounds set to FALSE
-    findArguments(args.source,args.target,0)
+    #findArguments(args.source,args.target,0)
     cleanArguments(args.source,args.target,0)
     print("Done! Happy corpus-based typological linguistics!\n")
 
