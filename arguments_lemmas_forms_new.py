@@ -378,7 +378,7 @@ def main():
      sys.stderr.write("There was a problem validating the arguments supplied. Please check your input and try again. Exiting...\n")
      sys.exit(1)
     #We call the two main functions with source, target and compounds set to FALSE
-    #findArguments(args.source,args.target,0)
+    findArguments(args.source,args.target,0)
     cleanArguments(args.source,args.target,0)
     print("Done! Happy corpus-based typological linguistics!\n")
 
