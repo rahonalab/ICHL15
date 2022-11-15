@@ -86,10 +86,10 @@ def count_overlap_lemmas(source,outfilename,language_list):
                 lemma = linelist[0].strip()
                 if lemma != "_" and len(lemma) > 0:
                     lemmaPOS = lemma + "/" + linelist[1]                    
-                    if linelist[2] == "obj":
-                        dict_obj[lemmaPOS].append(linelist[4].strip())
-                    elif linelist[2] == "nsubj_tr":
-                        dict_nsubj[lemmaPOS].append(linelist[4].strip())
+                    if linelist[3] == "obj":
+                        dict_obj[lemmaPOS].append(linelist[5].strip())
+                    elif linelist[3] == "nsubj_tr":
+                        dict_nsubj[lemmaPOS].append(linelist[5].strip())
             except:
                 print (line)
         set_nsubj = set(dict_nsubj)
@@ -124,7 +124,7 @@ def main():
      sys.stderr.write("There was a problem validating the arguments supplied. Please check your input and try again. Exiting...\n")
      sys.exit(1)
     #We include languages with morphological and syntactic (adposition) case marking
-    languages = ["cs","cy","da","de","el","es","fa","fr","hbs","hi","hy","it","kmr","la","lt","lv","no","pl","pt","ro","ru","sk","sv","uk","ur"]
+    languages = ["cs","cy","da","de","el","es","fa","fr","bhs","hi","hy","it","kmr","la","lt","lv","no","pl","pt","ro","ru","sk","sv","uk","ur"]
 
     count_overlap_lemmas(args.source,args.target,languages)
     print("Done! Happy corpus-based typological linguistics!\n")

@@ -24,9 +24,11 @@ MI_value <- function(data){
 for (i in list("ga","no","hy","uk","ur","pl","sk")){ 	
    csv <- read.csv(gsub(" ", "",paste("arguments-Leipzig/arguments_",i,"_clean.txt")),sep="\t",header=FALSE,quote="")
    print(i)
+   #csv$V1 <- gsub('[[:digit:]]+', '', csv$V1)
    cont <- table(csv$V1,csv$V4)
-   df <- as.data.frame.matrix(cont)
-   mi <- MI_value(cont)
+   #mi <- MI_value(cont)
+   df <- as.matrix(cont)
+   mutinformation(df$nsubj_tr,df$obj)
    print(mi)
    row <- data.frame(language=i,mi=mi)
    dftot <- rbind(dftot,row)
