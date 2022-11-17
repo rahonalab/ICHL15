@@ -40,7 +40,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
-USAGE = './word_order_script_CIEP.py <source_directory> <target_directory> [-h]'
+USAGE = './SO_rigidity.py <source_directory> <target_directory> [-h]'
 
 def build_parser():
 
@@ -67,7 +67,7 @@ languages_ciep = ["bg","br","cs","cy","da","de","el","en","es","fa","fr","ga","h
 def so_rigidity(directory,outfilename): #e.g., directory = "E:/LeipzigCorpora/Parsed/"
     outfile = open(outfilename, "w")
     outfile.write("Language\tSO-nouns\tOS-nouns\tSO-all\tOS-all\n")
-    for language in ["cy","test"]: 
+    for language in sorted((f for f in os.listdir(directory) if not f.startswith(".")), key=str.lower):
         filenames = glob.glob(directory+ language + "/*.conllu")
         print(filenames)
         SO_nouns = 0

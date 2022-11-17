@@ -64,17 +64,18 @@ languages_ciep = ["bg","br","cs","cy","da","de","el","en","es","fa","fr","ga","h
 def find_all_orders(directory, outfilename): #e.g., directory = "D:/Corpora/ud-treebanks-v2.7/"
     outfile = open(outfilename, "w")
     outfile.write("Language\tSOV\tSVO\tOSV\tOVS\tVSO\tVOS\tVerbScore\n") 
-    for language in languages_ciep: 
+    for language in sorted((f for f in os.listdir(directory) if not f.startswith(".")), key=str.lower):
+        print(language)
 #        filenames = glob.glob(directory + language + "*") 
-        filenames = glob.glob(directory + language + "/*.conllu")
-        print(filenames)
+        #filenames = glob.glob(directory + language + "/*.conllu")
+        #print(filenames)
         SOV = 0
         SVO = 0
         OSV = 0
         OVS = 0
         VSO = 0
         VOS = 0
-        for filename in filenames:
+        for filename in glob.glob(directory + language + "/*.conllu"):
             print (filename)
             try:
                 file = open(filename, "rb")
@@ -136,7 +137,11 @@ def find_all_orders(directory, outfilename): #e.g., directory = "D:/Corpora/ud-t
                                     print ("verb: " + str(token_id))
                                     print ("subject: " + str(token_id_subj))
                                     print ("object: " + str(token_id_obj))     
-        verb_order_score = ((VSO + VOS) + (SVO + OVS)*2 + (SOV + OSV)*3)/(SOV + SVO + VSO + VOS + OVS + OSV)
+        try:
+            verb_order_score = ((VSO + VOS) + (SVO + OVS)*2 + (SOV + OSV)*3)/(SOV + SVO + VSO + VOS + OVS + OSV)
+        except:
+            print("I cannot compute verb_order_score...")
+            verb_order_score = "n/a"
         out = language + "\t" + str(SOV) + "\t" + str(SVO) + "\t" + str(OSV) + "\t" + str(OVS) + "\t" + str(VSO) + "\t" + str(VOS) + "\t" + str(verb_order_score) +"\n"
         print (out)
         outfile.write(out)
