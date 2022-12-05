@@ -135,7 +135,8 @@ languages_with_cases = languages_with_cases = ["cs",
 def findArguments(source,target,compounds):
     language_list = languages_with_cases
     args = ["nsubj", "obj", "iobj", "obl"]
-    for language in ["ga","hy","no","pl","sk","ur","uk"]:
+    for language in sorted((f for f in os.listdir(source) if not f.startswith(".")), key=str.lower):    
+    #for language in ["mr"]:
         print (language)
         files = glob.glob(source+ language + "/*.conllu")
         if compounds == False:
@@ -290,7 +291,8 @@ def check_adposition(wordform, token_id, lines, language):
 
 def cleanArguments(source,target,compounds):
     language_list = languages_with_cases
-    for language in ["ga","hy","no","pl","sk","ur","uk"]:
+    for language in sorted((f for f in os.listdir(source) if not f.startswith(".")), key=str.lower):    
+    #for language in ["mr"]:
         print (language)
         if compounds == False: 
             filename = target + "/arguments_" + language + "_new.txt"
@@ -339,7 +341,7 @@ def cleanArguments(source,target,compounds):
                         if len(wordform.split("_")) > 2:
                             coreArg = False
                         casemarker = wordform.split("_")[1]
-                        if language in ["sp", "pt", "spa", "por", "es"]: 
+                        if language in ["sp", "pt", "spa", "por", "es", "ca"]: 
                             if casemarker not in ["a", "al"]: #added "al"
                                 coreArg = False
                         elif language in ["it", "ita"]:

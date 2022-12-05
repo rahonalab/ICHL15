@@ -1,12 +1,26 @@
 library(rstatix)
 library(DescTools)#for yet another sanity check, an alternative way of computing MI
 
-language_code_add <- c("ga", "hy", "no", "pl", "sk", "uk", "ur")
+language_code_add <- c("be","ga","ca","sl","mr")
 
-MI_lemmas_add <- numeric(length = 7)
-lemmas_add <- numeric(length = 7)
+table <- setNames(data.frame(matrix(ncol = 2, nrow = 0)), c("Language","semantic.tightness"))
 
-MI_check_lemmas_add <- numeric(length = 7)
+#http://www.cookbook-r.com/Manipulating_data/Converting_between_data_frames_and_contingency_tables/#countstocases-function
+countsToCases <- function(x, countcol = "Freq") {
+  # Get the row indices to pull from x
+  idx <- rep.int(seq_len(nrow(x)), x[[countcol]])
+  
+  # Drop count column
+  x[[countcol]] <- NULL
+  
+  # Get the rows from x
+  x[idx, ]
+}
+
+#MI_lemmas_add <- numeric(length = 7)
+#lemmas_add <- numeric(length = 7)
+
+#MI_check_lemmas_add <- numeric(length = 7)
 
 MI_value <- function(data){
   prop_data <- prop.table(data)
@@ -20,10 +34,9 @@ MI_value <- function(data){
 }
 
 
-for (i in 1:7){
-  lang <- language_code_add[i]
+for (lang in language_code_add){
   print (lang)
-  infilename <- paste("arguments-Leipzig/arguments_", lang, sep = "")
+  infilename <- paste("arguments-leipzig/arguments_", lang, sep = "")
   infilename <- paste(infilename, "_clean.txt", sep = "")
   data <- read.table(infilename, header = F, sep  ="\t", quote = "", comment = "", encoding = "UTF-8")
   print (dim(data))
@@ -45,13 +58,16 @@ for (i in 1:7){
   if (length(hyphen) > 0){
     mytable <- mytable[-hyphen,]
   }
-  lemmas_add[i] <- nrow(mytable)
-  MI_lemmas_add[i] <- MI_value(mytable)
-  print (MI_lemmas_add[i])
+  lemmas_add <- nrow(mytable)
+  MI_lemmas_add <- MI_value(mytable)
+  #print (MI_lemmas_add[i])
   data_restore <- countsToCases(as.data.frame(mytable))
-  MI_check_lemmas_add[i] <- MutInf(data_restore[, 1], data_restore[, 2])
-  print (MI_check_lemmas_add[i])
+  MI_check_lemmas_add <- MutInf(data_restore[, 1], data_restore[, 2])
+  print (MI_check_lemmas_add)
+  table <- rbind(table,data.frame(Language= lang,semantic.tightness=MI_check_lemmas_add))
 }
+
+write.table(table,file="semantic-tightness.tsv",sep="\t",row.names=FALSE)
 
 
 #Results:

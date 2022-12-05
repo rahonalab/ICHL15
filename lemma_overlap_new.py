@@ -65,18 +65,20 @@ import re
 from random import sample 
 
 
-def count_overlap_lemmas(source,outfilename,language_list):
+def count_overlap_lemmas(source,outfilename):
     outfile = open(outfilename, "w")
     outfile.write("language" + "\t" + "lemmas_overlap" + "\t" + "lemmas_total" + "\t" + "lemmas_overlap_weighted" + "\t" + "lemmas_total_weighted" + "\n")
-    for language in language_list:
-        print (language)
+    #for language in language_list:
+    for filename in sorted((f for f in os.listdir(source) if f.endswith("_clean.txt")), key=str.lower):    
+        print (filename)
         lemmas_overlap = 0
         lemmas_total = 0
         lemmas_overlap_weighted = 0
         lemmas_total_weighted = 0
         dict_nsubj = defaultdict(list)
         dict_obj = defaultdict(list)
-        infilename = source + "/arguments_" + language + "_clean.txt"#please modify it as you need
+        infilename = source + filename
+        #infilename = source + "/arguments_" + language + "_clean.txt"#please modify it as you need
         infile = open(infilename, "rb")
         lines = infile.readlines()
         for line in lines:
@@ -107,6 +109,7 @@ def count_overlap_lemmas(source,outfilename,language_list):
                     lemmas_overlap += 1
                 lemmas_total_weighted += 1*freq
                 lemmas_total += 1
+        language = filename.strip('arguments_').strip('_clean.txt')
         out = language + "\t" + str(lemmas_overlap) + "\t" + str(lemmas_total) + "\t" + str(lemmas_overlap_weighted) + "\t" + str(lemmas_total_weighted) + "\n"
         outfile.write(out)
         print(out)
@@ -124,9 +127,8 @@ def main():
      sys.stderr.write("There was a problem validating the arguments supplied. Please check your input and try again. Exiting...\n")
      sys.exit(1)
     #We include languages with morphological and syntactic (adposition) case marking
-    languages = ["cs","cy","da","de","el","es","fa","fr","bhs","hi","hy","it","kmr","la","lt","lv","no","pl","pt","ro","ru","sk","sv","uk","ur"]
-
-    count_overlap_lemmas(args.source,args.target,languages)
+    #languages = ["cs","cy","da","de","el","es","fa","fr","bhs","hi","hy","it","kmr","la","lt","lv","no","pl","pt","ro","ru","sk","sv","uk","ur"]
+    count_overlap_lemmas(args.source,args.target)
     print("Done! Happy corpus-based typological linguistics!\n")
 
 if __name__ == "__main__":
